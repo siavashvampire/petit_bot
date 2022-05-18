@@ -2,5 +2,9 @@
 database/
 
 *.gcode
-
+tiny
 .idea/
+
+__pycache__/
+
+junk/

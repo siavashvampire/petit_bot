@@ -1,5 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackQueryHandler, ContextTypes
+from telegram.ext import CallbackQueryHandler
 from telegram.ext.updater import Updater
 from telegram.update import Update
 from telegram.ext.callbackcontext import CallbackContext
@@ -7,18 +7,13 @@ from telegram.ext.commandhandler import CommandHandler
 from telegram.ext.messagehandler import MessageHandler
 from telegram.ext.filters import Filters
 from pathlib import Path
-from tinydb import TinyDB
+from database import update_database, get_database
 
-db = TinyDB('database/config.json')
-table = db.table('config')
-
+density = get_database('density')
 parent_path = Path(__file__).resolve().parent
 
 updater = Updater("5377461148:AAFekpap_Fs-C-_3CVPi50nexYOsAQK-IuQ",
                   use_context=True)
-data_all = table.all()[0]
-
-density: float = data_all['density']
 
 keyboard = [
     [
@@ -58,11 +53,7 @@ def start(update: Update, context: CallbackContext):
 
 
 def help(update: Update, context: CallbackContext):
-    update.message.reply_text("""Available Commands :-
-	/youtube - To get the youtube URL
-	/linkedin - To get the LinkedIn profile URL
-	/gmail - To get gmail URL
-	/geeks - To get the GeeksforGeeks URL""")
+    update.message.reply_text("qwdsa")
 
 
 def read_float_number(data: str, text: str) -> float:
@@ -91,19 +82,20 @@ def gcode(update: Update, context: CallbackContext):
 
 
 def den(update: Update, context: CallbackContext):
-    global first_try
+    global first_try, density
     first_try = True
-    asd = update.message.text.replace('/set_density', '')
+    param_bot = update.message.text.replace('/set_density', '')
 
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
 
-    if asd == '':
+    if param_bot == '':
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text="enter density",
                                  reply_markup=inline_keyboard_markup)
     else:
-        data = float(asd)
-        table.update({'density': data})
+        data = float(param_bot)
+        density = data
+        update_database('density', data)
         update.message.reply_text(text=f"density set to {data}")
 
 
@@ -160,7 +152,7 @@ def readfile(update: Update, context: CallbackContext):
 
 def button(update: Update, context) -> None:
     query = update.callback_query
-    global first_try, density_temp, density_temp_float, float_flag
+    global first_try, density_temp, density_temp_float, float_flag, density
     if first_try:
         first_try = False
         density_temp = ""
@@ -171,8 +163,9 @@ def button(update: Update, context) -> None:
         float_flag = True
 
     if query.data == "enter":
-        data = float(str(density_temp) + "." + str(density_temp_float))
-        table.update({'density': data})
+        data = float(density_temp + "." + density_temp_float)
+        density = data
+        update_database('density', data)
         query.edit_message_text(text=f"density set to {data}")
         return
 
