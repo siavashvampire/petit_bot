@@ -9,7 +9,6 @@ from telegram.ext.filters import Filters
 from pathlib import Path
 from database import update_database, get_database
 
-density = get_database('density')
 parent_path = Path(__file__).resolve().parent
 
 updater = Updater("5377461148:AAFekpap_Fs-C-_3CVPi50nexYOsAQK-IuQ",
@@ -37,23 +36,22 @@ keyboard = [
         InlineKeyboardButton("Enter", callback_data="enter"),
     ],
 ]
-
 inline_keyboard_markup = InlineKeyboardMarkup(keyboard)
 
-density_temp = ""
-density_temp_float = ""
-first_try = False
-float_flag = False
+density = 0.0
+
+
+def restart_set_density(chat_dict):
+    chat_dict['density_temp'] = ""
+    chat_dict['density_temp_float'] = ""
+    chat_dict['first_try'] = True
+    chat_dict['float_flag'] = False
 
 
 def start(update: Update, context: CallbackContext):
     update.message.reply_text(
         "Hello sir, Welcome to the Bot.Please write\
         /help to see the commands available.")
-
-
-def help(update: Update, context: CallbackContext):
-    update.message.reply_text("qwdsa")
 
 
 def read_float_number(data: str, text: str) -> float:
@@ -77,13 +75,21 @@ def read_int_number(data: str, text: str) -> int:
     return int(re.findall("\d+", re_value)[0])
 
 
+def update_density(value=-1.0):
+    global density
+    if value != -1:
+        density = value
+        update_database('density', value)
+    else:
+        density = get_database('density')
+
+
 def gcode(update: Update, context: CallbackContext):
     update.message.reply_text("Please upload your G_code : ")
 
 
 def den(update: Update, context: CallbackContext):
-    global first_try, density
-    first_try = True
+    restart_set_density(context.chat_data)
     param_bot = update.message.text.replace('/set_density', '')
 
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
@@ -94,8 +100,7 @@ def den(update: Update, context: CallbackContext):
                                  reply_markup=inline_keyboard_markup)
     else:
         data = float(param_bot)
-        density = data
-        update_database('density', data)
+        update_density(data)
         update.message.reply_text(text=f"density set to {data}")
 
 
@@ -150,46 +155,41 @@ def readfile(update: Update, context: CallbackContext):
     # update.message.reply_text(text_1)
 
 
-def button(update: Update, context) -> None:
+def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
-    global first_try, density_temp, density_temp_float, float_flag, density
-    if first_try:
-        first_try = False
-        density_temp = ""
-        density_temp_float = ""
-        float_flag = False
+    chat_data = context.chat_data
+    if chat_data['first_try']:
+        chat_data['first_try'] = False
 
     if query.data == ".":
-        float_flag = True
+        chat_data['float_flag'] = True
 
     if query.data == "enter":
-        data = float(density_temp + "." + density_temp_float)
-        density = data
-        update_database('density', data)
+        data = float(chat_data['density_temp'] + "." + chat_data['density_temp_float'])
+        update_density(data)
         query.edit_message_text(text=f"density set to {data}")
         return
 
     if query.data.isdigit() and int(query.data) in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
         data = query.data
 
-        if float_flag:
-            # density_temp_float *= 10
-            density_temp_float += data
+        if chat_data['float_flag']:
+            chat_data['density_temp_float'] += data
         else:
-            # density_temp *= 10
-            density_temp += data
+            chat_data['density_temp'] += data
 
-    if float_flag:
-        density_1 = float(density_temp + "." + density_temp_float)
+    if chat_data['float_flag']:
+        density_1 = float(chat_data['density_temp'] + "." + chat_data['density_temp_float'])
     else:
-        density_1 = density_temp
+        density_1 = chat_data['density_temp']
 
     query.answer()
     query.edit_message_text(text=f"density : {density_1}", reply_markup=inline_keyboard_markup)
 
 
+update_density()
+
 updater.dispatcher.add_handler(CommandHandler('start', start))
-updater.dispatcher.add_handler(CommandHandler('help', help))
 updater.dispatcher.add_handler(CommandHandler('upload_gcode', gcode))
 updater.dispatcher.add_handler(CommandHandler('set_density', den))
 updater.dispatcher.add_handler(CallbackQueryHandler(button))

@@ -5,6 +5,7 @@ from tinydb import TinyDB, Query
 db = TinyDB('database/config.json')
 query = Query()
 table = db.table('config')
+# table.insert({'density':5})
 data_all = table.all()[0]
 
 density: float = data_all['density']
