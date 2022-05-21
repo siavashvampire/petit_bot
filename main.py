@@ -10,9 +10,37 @@ from pathlib import Path
 from database import update_database, get_database
 
 parent_path = Path(__file__).resolve().parent
-
 updater = Updater("5377461148:AAFekpap_Fs-C-_3CVPi50nexYOsAQK-IuQ",
                   use_context=True)
+
+keyboard = [
+    [
+        InlineKeyboardButton("Yes", callback_data="Yes"),
+        InlineKeyboardButton("No", callback_data="No"),
+
+    ]
+]
+
+ikm_yes_no = InlineKeyboardMarkup(keyboard)
+
+
+def readfile_png(update: Update, context: CallbackContext):
+    dc = update.message.photo[-1]
+    ghazal = dc.get_file()
+    path = parent_path.joinpath('junk/' + 'siavash.jpg')
+    f_gcode = ghazal.download(str(path))
+
+    text = ('done')
+    update.message.reply_text(text)
+
+
+PHOTO_PATH = 'junk/siavash.jpg'
+
+bot = updater.bot
+
+# bot.send_message(chat_id='-1567906020', text="From Telegram Bot")
+#
+# bot.send_photo(chat_id='-1567906020', photo=open(PHOTO_PATH, 'rb'),caption = 'hi')
 
 keyboard = [
     [
@@ -36,9 +64,21 @@ keyboard = [
         InlineKeyboardButton("Enter", callback_data="enter"),
     ],
 ]
-inline_keyboard_markup = InlineKeyboardMarkup(keyboard)
+
+ikm_full = InlineKeyboardMarkup(keyboard)
+
+density_temp = ""
+density_temp_float = ""
+first_try = False
+float_flag = False
 
 density = 0.0
+
+
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text(
+        "Hello sir, Welcome to the Bot.Please write\
+        /help to see the commands available.")
 
 
 def restart_set_density(chat_dict):
@@ -46,12 +86,7 @@ def restart_set_density(chat_dict):
     chat_dict['density_temp_float'] = ""
     chat_dict['first_try'] = True
     chat_dict['float_flag'] = False
-
-
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text(
-        "Hello sir, Welcome to the Bot.Please write\
-        /help to see the commands available.")
+    chat_dict['command'] = 'density'
 
 
 def read_float_number(data: str, text: str) -> float:
@@ -97,7 +132,7 @@ def den(update: Update, context: CallbackContext):
     if param_bot == '':
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text="enter density",
-                                 reply_markup=inline_keyboard_markup)
+                                 reply_markup=ikm_full)
     else:
         data = float(param_bot)
         update_density(data)
@@ -156,6 +191,13 @@ def readfile(update: Update, context: CallbackContext):
 
 
 def button(update: Update, context: CallbackContext) -> None:
+    if context.chat_data['command'] == 'density':
+        density_button(update, context)
+    elif context.chat_data['command'] == 'file_stl':
+        density_button(update, context)
+
+
+def density_button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     chat_data = context.chat_data
     if chat_data['first_try']:
@@ -168,6 +210,7 @@ def button(update: Update, context: CallbackContext) -> None:
         data = float(chat_data['density_temp'] + "." + chat_data['density_temp_float'])
         update_density(data)
         query.edit_message_text(text=f"density set to {data}")
+        context.chat_data['command'] = ''
         return
 
     if query.data.isdigit() and int(query.data) in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
@@ -184,15 +227,14 @@ def button(update: Update, context: CallbackContext) -> None:
         density_1 = chat_data['density_temp']
 
     query.answer()
-    query.edit_message_text(text=f"density : {density_1}", reply_markup=inline_keyboard_markup)
+    query.edit_message_text(text=f"density : {density_1}", reply_markup=ikm_full)
 
-
-update_density()
 
 updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CommandHandler('upload_gcode', gcode))
 updater.dispatcher.add_handler(CommandHandler('set_density', den))
 updater.dispatcher.add_handler(CallbackQueryHandler(button))
 updater.dispatcher.add_handler(MessageHandler(Filters.document.file_extension('gcode'), readfile))
+updater.dispatcher.add_handler(MessageHandler(Filters.photo, readfile_png))
 
 updater.start_polling()
