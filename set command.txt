@@ -1,5 +1,6 @@
 upload_gcode - gcode
 set_density - weight
+set_idea - insert idea
 
 
 bot_poll - poll

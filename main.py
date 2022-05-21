@@ -1,4 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, PhotoSize
 from telegram.ext import CallbackQueryHandler
 from telegram.ext.updater import Updater
 from telegram.update import Update
@@ -23,24 +23,11 @@ keyboard = [
 
 ikm_yes_no = InlineKeyboardMarkup(keyboard)
 
-
-def readfile_png(update: Update, context: CallbackContext):
-    dc = update.message.photo[-1]
-    ghazal = dc.get_file()
-    path = parent_path.joinpath('junk/' + 'siavash.jpg')
-    f_gcode = ghazal.download(str(path))
-
-    text = ('done')
-    update.message.reply_text(text)
-
-
 PHOTO_PATH = 'junk/siavash.jpg'
 
 bot = updater.bot
-
-# bot.send_message(chat_id='-1567906020', text="From Telegram Bot")
-#
-# bot.send_photo(chat_id='-1567906020', photo=open(PHOTO_PATH, 'rb'),caption = 'hi')
+# channel_id = -1001757304606  # test
+channel_id = -1001567906020  # main
 
 keyboard = [
     [
@@ -67,12 +54,37 @@ keyboard = [
 
 ikm_full = InlineKeyboardMarkup(keyboard)
 
-density_temp = ""
-density_temp_float = ""
-first_try = False
-float_flag = False
-
 density = 0.0
+
+
+def readfile_png(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+    if 'command' not in chat_data.keys() or chat_data['command'] == '':
+        update.message.reply_text("command not set")
+        return
+    elif chat_data['command'] == 'set_idea_upload_picture':
+        set_idea_upload_picture(update, context)
+
+
+def set_idea_upload_picture(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+    download_photo(update.message.photo[-1], 'junk/' + 'siavash.jpg')
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
+
+    message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Please send description for this idea :")
+
+    chat_data['set_idea_send_message_id'] = message.message_id
+
+    chat_data['command'] = 'set_idea_input_description'
+
+
+def download_photo(photo: PhotoSize, path: str):
+    files = photo.get_file()
+    path_temp = parent_path.joinpath(path)
+    f_gcode = files.download(str(path_temp))
+    return f_gcode
 
 
 def start(update: Update, context: CallbackContext):
@@ -82,6 +94,14 @@ def start(update: Update, context: CallbackContext):
 
 
 def restart_set_density(chat_dict):
+    chat_dict['density_temp'] = ""
+    chat_dict['density_temp_float'] = ""
+    chat_dict['first_try'] = True
+    chat_dict['float_flag'] = False
+    chat_dict['command'] = 'density'
+
+
+def restart_set_idea(chat_dict):
     chat_dict['density_temp'] = ""
     chat_dict['density_temp_float'] = ""
     chat_dict['first_try'] = True
@@ -193,8 +213,22 @@ def readfile(update: Update, context: CallbackContext):
 def button(update: Update, context: CallbackContext) -> None:
     if context.chat_data['command'] == 'density':
         density_button(update, context)
-    elif context.chat_data['command'] == 'file_stl':
-        density_button(update, context)
+    elif context.chat_data['command'] == 'set_idea_stl_file_Q':
+        idea_stl_file_question(update, context)
+
+
+def idea_stl_file_question(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    query.answer()
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+    chat_data = context.chat_data
+    # message.from_user.first_name
+    # message.from_user.last_name
+    # message.from_user.username
+    caption = chat_data['set_idea_description'] + '\n' + '#idea' + '\n' + 'innovator : ' + chat_data[
+        'set_idea_innovator'] + '\n' + 'uploader : ' +chat_data['user_name'] + '\n' + 'file stl :' + query.data
+    message = context.bot.send_photo(chat_id=channel_id, photo=open(PHOTO_PATH, 'rb'), caption=caption)
+    context.bot.forwardMessage(chat_id=update.effective_chat.id, from_chat_id=channel_id, message_id=message.message_id)
 
 
 def density_button(update: Update, context: CallbackContext) -> None:
@@ -230,11 +264,62 @@ def density_button(update: Update, context: CallbackContext) -> None:
     query.edit_message_text(text=f"density : {density_1}", reply_markup=ikm_full)
 
 
+def set_idea(update: Update, context: CallbackContext) -> None:
+    chat_data = context.chat_data
+    chat_data['command'] = 'set_idea_upload_picture'
+    chat_data['user_name'] = '@' + update.effective_user.username
+
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+
+    message = context.bot.send_message(chat_id=update.effective_chat.id, text="Please upload your picture as photos: ")
+    chat_data['set_idea_send_message_id'] = message.message_id
+
+
+def input_text(update: Update, context: CallbackContext) -> None:
+    chat_data = context.chat_data
+    if 'command' not in chat_data.keys() or chat_data['command'] == '':
+        update.message.reply_text("command not set")
+        return
+    elif chat_data['command'] == 'set_idea_input_description':
+        set_idea_input_description(update, context)
+    elif chat_data['command'] == 'set_idea_input_innovator':
+        set_idea_input_innovator(update, context)
+
+
+def set_idea_input_description(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+    chat_data['set_idea_description'] = update.message.text
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
+
+    message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Please send innovator for this idea :")
+    chat_data['set_idea_send_message_id'] = message.message_id
+
+    chat_data['command'] = 'set_idea_input_innovator'
+
+
+def set_idea_input_innovator(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+    chat_data['set_idea_innovator'] = update.message.text
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
+
+    message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="if there exist stl file ?",
+                                       reply_markup=ikm_yes_no)
+    chat_data['set_idea_send_message_id'] = message.message_id
+
+    chat_data['command'] = 'set_idea_stl_file_Q'
+
+
 updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CommandHandler('upload_gcode', gcode))
 updater.dispatcher.add_handler(CommandHandler('set_density', den))
+updater.dispatcher.add_handler(CommandHandler('set_idea', set_idea))
 updater.dispatcher.add_handler(CallbackQueryHandler(button))
 updater.dispatcher.add_handler(MessageHandler(Filters.document.file_extension('gcode'), readfile))
 updater.dispatcher.add_handler(MessageHandler(Filters.photo, readfile_png))
+updater.dispatcher.add_handler(MessageHandler(Filters.text, input_text))
 
 updater.start_polling()
