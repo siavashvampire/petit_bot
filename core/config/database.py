@@ -2,13 +2,15 @@ from typing import Union
 
 from tinydb import TinyDB, Query
 
-db = TinyDB('database/config.json')
+db = TinyDB('core/database/config.json')
 query = Query()
 table = db.table('config')
-# table.insert({'density':5})
+
 data_all = table.all()[0]
 
 density: float = data_all['density']
+telegram_token: str = data_all['telegram_token']
+channel_id: int = data_all['channel_id']
 
 
 def update_database(key: str, value: Union[int, float]) -> None:
@@ -17,11 +19,3 @@ def update_database(key: str, value: Union[int, float]) -> None:
 
 def get_database(key: str):
     return data_all[key]
-
-
-def insert_database(id: int, step: int, value: int):
-    return db.insert({'id': id, 'step': step, 'value': value})
-
-
-def get_database_step_by_id(id: int):
-    return db.get(query.id == id)
