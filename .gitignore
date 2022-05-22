@@ -8,3 +8,5 @@ tiny
 __pycache__/
 
 app/gcode/junk/
+
+*.json
