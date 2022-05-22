@@ -1,9 +1,0 @@
-upload_gcode - gcode
-set_density - weight
-set_idea - insert idea
-
-
-bot_poll - poll
-result - result
-result_sort - sorted result
-delete_poll - delete your poll
