@@ -241,7 +241,7 @@ def set_idea_change_user_idea(update: Update, context: CallbackContext):
     chat_data = context.chat_data
     user = get_user(username=chat_data['value'])
 
-    user.chang_idea_flag(True if query.data == 'yes' else False)
+    user.change_idea_flag(True if query.data == 'yes' else False)
 
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
 
