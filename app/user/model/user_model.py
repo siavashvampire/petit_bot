@@ -5,6 +5,7 @@ from app.user.database import table
 
 query = Query()
 idea_admin_id = 72025606
+accounting_admin_id = 99981475
 
 
 class UserDB(User):
@@ -39,18 +40,23 @@ class UserDB(User):
             return True
         return False
 
+    def is_accounting_admin(self):
+        if self.id == accounting_admin_id:
+            return True
+        return False
+
     def can_insert_idea(self):
         if self.idea_flag:
             return True
         return False
 
     def can_insert_accounting(self):
-        if self.idea_flag:
+        if self.accounting_flag:
             return True
         return False
 
-    def chang_idea_flag(self, value: bool):
+    def change_idea_flag(self, value: bool):
         self.table.update({'idea_flag': value}, query.id == self.id)
 
-    def chang_accounting_flag(self, value: bool):
+    def change_accounting_flag(self, value: bool):
         self.table.update({'accounting_flag': value}, query.id == self.id)
