@@ -6,7 +6,7 @@ db = TinyDB('app/density/database/density.json')
 query = Query()
 table = db.table('density')
 
-data_all = table.all()[0]
+# data_all = table.all()[0]
 #
 # density: float = data_all['density']
 
