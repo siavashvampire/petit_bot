@@ -23,7 +23,8 @@ if __name__ == '__main__':
     from app.gcode.main import gcode, readfile
     from app.idea.main import set_idea, add_user_idea
     from core.config.database import telegram_token
-    from core.handler import button, readfile_png, input_text
+    from core.handler import button, readfile_png, input_text, pdf_handler
+    from app.accounting.main import set_accounting
 
     updater = Updater(telegram_token, use_context=True)
 
@@ -31,9 +32,11 @@ if __name__ == '__main__':
     updater.dispatcher.add_handler(CommandHandler('upload_gcode', gcode))
     updater.dispatcher.add_handler(CommandHandler('set_density', den))
     updater.dispatcher.add_handler(CommandHandler('set_idea', set_idea))
+    updater.dispatcher.add_handler(CommandHandler('set_accounting', set_accounting))
     updater.dispatcher.add_handler(CommandHandler('add_user_idea', add_user_idea))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(MessageHandler(Filters.document.file_extension('gcode'), readfile))
+    updater.dispatcher.add_handler(MessageHandler(Filters.document.pdf, pdf_handler))
     updater.dispatcher.add_handler(MessageHandler(Filters.photo, readfile_png))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, input_text))
 
