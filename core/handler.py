@@ -1,15 +1,15 @@
 from telegram.update import Update
 from telegram.ext.callbackcontext import CallbackContext
 
-from app.density.main import density_button
+from app.density.main import density_set_density
 from app.idea.main import idea_stl_file_question, set_idea_accepted_idea, set_idea_same_innovator, \
     set_idea_input_description, set_idea_input_innovator, set_idea_upload_picture, set_idea_change_user_idea_start, \
-    set_idea_change_user_idea
+    set_idea_change_user_idea, set_idea_input_stl_link
 
 
 def button(update: Update, context: CallbackContext) -> None:
     if context.chat_data['command'] == 'density':
-        density_button(update, context)
+        density_set_density(update, context)
     elif context.chat_data['command'] == 'set_idea_stl_file_Q':
         idea_stl_file_question(update, context)
     elif context.chat_data['command'] == 'set_idea_set_overview':
@@ -18,6 +18,7 @@ def button(update: Update, context: CallbackContext) -> None:
         set_idea_same_innovator(update, context)
     elif context.chat_data['command'] == 'set_idea_change_user_idea':
         set_idea_change_user_idea(update, context)
+
 
 
 def input_text(update: Update, context: CallbackContext) -> None:
@@ -31,6 +32,10 @@ def input_text(update: Update, context: CallbackContext) -> None:
         set_idea_input_innovator(update, context)
     elif chat_data['command'] == 'set_idea_change_user_idea_start':
         set_idea_change_user_idea_start(update, context)
+    elif chat_data['command'] == 'set_idea_input_stl_link':
+        set_idea_input_stl_link(update, context)
+    elif chat_data['command'] == 'set_idea_input_stl_file':
+        set_idea_input_stl_link(update, context)
 
 
 def readfile_png(update: Update, context: CallbackContext):
@@ -40,3 +45,6 @@ def readfile_png(update: Update, context: CallbackContext):
         return
     elif chat_data['command'] == 'set_idea_upload_picture':
         set_idea_upload_picture(update, context)
+    else:
+        update.message.reply_text("command that set is wrong")
+        return

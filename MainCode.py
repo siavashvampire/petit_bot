@@ -2,7 +2,7 @@ from pathlib import Path
 from telegram.update import Update
 from telegram.ext.callbackcontext import CallbackContext
 
-from app.user.database import add_user
+from app.user.api import add_user
 
 parent_path = Path(__file__).resolve().parent
 

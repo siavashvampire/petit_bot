@@ -1,28 +1,30 @@
-from typing import Optional
-
 from telegram import User
 from tinydb import Query
 from tinydb.table import Table
+from app.user.database import table
 
 query = Query()
+idea_admin_id = 72025606
 
 
 class UserDB(User):
-    table: Optional[Table]
+    table: Table
     idea_flag: bool
 
-    def __init__(self, user: User = None, id_in: int = 0, username: str = "", first_name: str = "",
-                 last_name: str = "", table: Table = None, idea_flag: bool = False):
-        if id_in == 0 and user is not None:
-            id_in = user.id
-            username = user.username
-            first_name = user.first_name
-            last_name = user.last_name
+    def __init__(self, id_in: int = 0, username: str = "", first_name: str = "",
+                 last_name: str = "", idea_flag: bool = False):
+        self.table = table
+
+        if id_in != 0 and username == "":
+            self.id = id_in
+            search = self.table.get(query.id == self.id)
+            username = search['username']
+            first_name = search['first_name']
+            self.idea_flag = search['idea_flag']
+        else:
+            self.idea_flag = idea_flag
 
         super().__init__(id=id_in, first_name=first_name, is_bot=False, last_name=last_name, username=username)
-
-        self.table = table
-        self.idea_flag = idea_flag
 
     def insert_user(self):
         self.table.upsert(
@@ -30,7 +32,7 @@ class UserDB(User):
             query.id == self.id)
 
     def is_idea_admin(self):
-        if self.id == 72025606:
+        if self.id == idea_admin_id:
             return True
         return False
 

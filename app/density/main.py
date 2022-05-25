@@ -21,7 +21,7 @@ def den(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(text=f"density set to {data}")
 
 
-def density_button(update: Update, context: CallbackContext) -> None:
+def density_set_density(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     chat_data = context.chat_data
     if chat_data['first_try']:
