@@ -10,3 +10,5 @@ __pycache__/
 app/gcode/junk/
 
 *.json
+
+app/accounting/junk/
