@@ -5,6 +5,7 @@ from telegram.update import Update
 from telegram.ext.callbackcontext import CallbackContext
 
 from app.density.database.database import get_density
+from core.api import download_document
 
 
 def read_float_number(data: str, text: str) -> float:
@@ -35,12 +36,8 @@ def gcode(update: Update, context: CallbackContext) -> None:
 def readfile(update: Update, context: CallbackContext) -> None:
     density = get_density()
     dc = update.message.document
-    ghazal = dc.get_file()
-    path = parent_path.joinpath('app/gcode/junk/' + dc.file_name)
-    f_gcode = ghazal.download(str(path))
-    path = path.joinpath(f_gcode)
+    path = download_document(update.message.document, 'app/gcode/junk/')
 
-    # print(path)
     with open(path, 'r') as f_gcode:
         data = f_gcode.read()
     Path.unlink(path)
