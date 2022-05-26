@@ -3,6 +3,7 @@ set_density - weight
 set_idea - insert idea
 set_accounting - insert accounting
 add_user_idea - add user idea
+add_user_accounting - add user accounting
 
 
 bot_poll - poll
