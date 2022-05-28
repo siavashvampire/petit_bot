@@ -11,7 +11,7 @@ def download_photo(photo: PhotoSize, path: str):
 
 
 def download_document(document: Document, path: str):
-    file = document.get_file()
     path_temp = parent_path.joinpath(path + document.file_name)
+    file = document.get_file()
     file = file.download(str(path_temp))
     return path_temp.joinpath(file)

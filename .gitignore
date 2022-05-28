@@ -12,3 +12,5 @@ app/gcode/junk/
 *.json
 
 app/accounting/junk/
+
+app/idea/junk/

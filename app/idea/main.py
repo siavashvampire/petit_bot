@@ -104,10 +104,11 @@ def set_idea_insert_idea(update: Update, context: CallbackContext) -> None:
     idea_id = idea_model.Idea(chat_data['user_name'], chat_data['set_idea_innovator'],
                               chat_data['set_idea_description'], chat_data['overview'])
     overview = 'yes' if chat_data['overview'] else 'no'
+    stl_link = 'yes : ' + chat_data['set_idea_input_stl_link'] if chat_data['stl_link'] else 'Not existed ! '
     caption = chat_data['set_idea_description'] + '\n' + '#idea' + '\n' + 'innovator : ' + \
               chat_data['set_idea_innovator'] + '\n' + 'uploader : ' + chat_data['user_name'] + '\n' + 'overview : ' + \
               overview + '\n' + "idea_number :" + str(idea_id) + '\n' + 'file stl: ' + chat_data[
-                  'file_question']
+                  'file_question'] + '\n' + 'stl_link :' + stl_link
 
     message_temp = context.bot.send_message(chat_id=update.effective_chat.id, text="start uploading and posting idea")
 
@@ -142,7 +143,7 @@ def idea_stl_file_question(update: Update, context: CallbackContext) -> None:
     else:
         message = context.bot.send_message(chat_id=update.effective_chat.id,
                                            text="process 5/10 [#####-------]" + '\n' + \
-                                                "input your stl link,please : ")
+                                                "insert your stl link,please : ")
 
         chat_data['set_idea_send_message_id'] = message.message_id
         chat_data['command'] = 'set_idea_input_stl_link'
