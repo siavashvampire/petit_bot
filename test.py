@@ -55,7 +55,7 @@ def set_idea_input_stl_link(update: Update, context: CallbackContext):
 def set_idea_insert_stl_file(update: Update, context: CallbackContext):
     chat_data = context.chat_data
 
-    download_file(update.message.file[0], 'app/idea/junk/stl_file')
+    download_document(update.message.file[0], 'app/idea/junk/stl_file')
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 
