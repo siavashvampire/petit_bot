@@ -2,6 +2,7 @@ from pathlib import Path
 from telegram.update import Update
 from telegram.ext.callbackcontext import CallbackContext
 
+
 from app.user.api import add_user
 
 parent_path = Path(__file__).resolve().parent
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     from telegram.ext.filters import Filters
     from app.density.main import den
     from app.gcode.main import gcode, readfile
-    from app.idea.main import set_idea, add_user_idea
+    from app.idea.main import set_idea, add_user_idea, set_idea_upload_stl_file
     from core.config.database import telegram_token
     from core.handler import button, readfile_png, input_text, pdf_handler
     from app.accounting.main import set_accounting
@@ -36,6 +37,7 @@ if __name__ == '__main__':
     updater.dispatcher.add_handler(CommandHandler('add_user_idea', add_user_idea))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(MessageHandler(Filters.document.file_extension('gcode'), readfile))
+    updater.dispatcher.add_handler(MessageHandler(Filters.document.file_extension('stl'), set_idea_upload_stl_file))
     updater.dispatcher.add_handler(MessageHandler(Filters.document.pdf, pdf_handler))
     updater.dispatcher.add_handler(MessageHandler(Filters.photo, readfile_png))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, input_text))
