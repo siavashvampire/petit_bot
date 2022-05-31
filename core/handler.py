@@ -5,7 +5,8 @@ from app.accounting.main import set_accounting_upload_picture, set_accounting_up
 from app.density.main import density_set_density
 from app.idea.main import idea_stl_file_question, set_idea_accepted_idea, set_idea_same_innovator, \
     set_idea_input_description, set_idea_input_innovator, set_idea_upload_picture, set_idea_change_user_idea_start, \
-    set_idea_change_user_idea, set_idea_input_stl_link, set_idea_insert_stl_file
+    set_idea_change_user_idea, set_idea_input_stl_link, set_idea_insert_stl_file, set_idea_overview, \
+    set_idea_insert_idea
 
 
 def button(update: Update, context: CallbackContext) -> None:
@@ -39,6 +40,8 @@ def input_text(update: Update, context: CallbackContext) -> None:
         set_idea_change_user_idea_start(update, context)
     elif context.chat_data['command'] == 'set_idea_input_stl_link':
         set_idea_input_stl_link(update, context)
+    elif context.chat_data['command'] == 'set_idea_overview':
+        set_idea_overview(update, context)
 
 
 
