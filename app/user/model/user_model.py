@@ -4,7 +4,8 @@ from tinydb.table import Table
 from app.user.database import table
 
 query = Query()
-idea_admin_id = 72025606
+# idea_admin_id = 72025606
+idea_admin_id = 21221221
 accounting_admin_id = 99981475
 
 
