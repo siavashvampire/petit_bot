@@ -1,3 +1,5 @@
+import re
+
 from telegram import PhotoSize, Document
 
 from MainCode import parent_path
@@ -15,3 +17,9 @@ def download_document(document: Document, path: str):
     file = document.get_file()
     file = file.download(str(path_temp))
     return path_temp.joinpath(file)
+
+
+def format_url(url: str) -> str:
+    if not re.match('(?:http|ftp|https)://', url):
+        return 'https://{}'.format(url)
+    return url
