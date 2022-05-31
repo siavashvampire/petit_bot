@@ -7,6 +7,7 @@ from telegram.ext.callbackcontext import CallbackContext
 
 from MainCode import parent_path
 from app.user.api import get_all_user, get_user
+from app.user.model.user_model import idea_admin_id
 from core.api import download_photo, download_document, format_url
 from core.config.database import channel_id
 from app.idea.model import idea_model
@@ -35,7 +36,7 @@ def set_idea_input_description(update: Update, context: CallbackContext) -> None
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 
     message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 2/10 [##----------]" + '\n' + \
+                                       text="process 3/11 [###--------]" + '\n' + \
                                             "same person as uploader?",
                                        reply_markup=ikm_yes_no)
 
@@ -51,7 +52,7 @@ def set_idea_input_innovator(update: Update, context: CallbackContext) -> None:
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 
     message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 4/10 [#####-------]" + '\n' + \
+                                       text="process 5/11 [#####------]" + '\n' + \
                                             "if there exist stl file ?",
                                        reply_markup=ikm_yes_no)
     chat_data['set_idea_send_message_id'] = message.message_id
@@ -67,7 +68,7 @@ def set_idea_same_innovator(update: Update, context: CallbackContext) -> None:
 
     if query.data == 'yes':
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 5/10 [#####-------]" + '\n' + \
+                                           text="process 6/11 [######-------]" + '\n' + \
                                                 "if there exist stl file ?",
                                            reply_markup=ikm_yes_no)
 
@@ -78,7 +79,7 @@ def set_idea_same_innovator(update: Update, context: CallbackContext) -> None:
         chat_data['command'] = 'set_idea_stl_file_Q'
     else:
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 3/10 [###--------]" + '\n' + \
+                                           text="process 4/11 [####--------]" + '\n' + \
                                                 "Please send innovator for this idea :"
                                            )
         chat_data['set_idea_send_message_id'] = message.message_id
@@ -105,8 +106,10 @@ def set_idea_insert_idea(update: Update, context: CallbackContext) -> None:
     chat_data = context.chat_data
     idea_id = idea_model.Idea(chat_data['user_name'], chat_data['set_idea_innovator'],
                               chat_data['set_idea_description'], chat_data['overview'])
-    overview = 'yes' if chat_data['overview'] else 'no'
-    stl_link = 'yes : ' + chat_data['set_idea_input_stl_link'] if chat_data['stl_link'] else 'Not existed ! '
+    overview = chat_data['overview'] if chat_data['overview'] else 'Not decided yet !'
+    stl_link = 'yes : ' + chat_data['stl_link'] if chat_data['stl_link'] else 'Not existed ! '
+    # stl_file = 'yes' if chat_data['set_idea_upload_stl_file'] else 'Not existed ! '
+
     caption = chat_data['set_idea_description'] + '\n' + '#idea' + '\n' + 'innovator : ' + \
               chat_data['set_idea_innovator'] + '\n' + 'uploader : ' + chat_data['user_name'] + '\n' + 'overview : ' + \
               overview + '\n' + "idea_number :" + str(idea_id) + '\n' + 'file stl: ' + chat_data[
@@ -134,17 +137,26 @@ def idea_stl_file_question(update: Update, context: CallbackContext) -> None:
     chat_data['file_question'] = query.data
 
     if query.data == 'no':
-        message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 9/10 [#########-]" + '\n' + \
-                                                "your overview : ",
-                                           reply_markup=ikm_yes_no)
+        user = get_user(user=update.effective_user)
+        if user.is_idea_admin():
+            message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                               text="process 11/11 [###########]" + '\n' + \
+                                                    "your overview :")
+
+            chat_data['set_idea_send_message_id'] = message.message_id
+            chat_data['command'] = 'set_idea_overview'
+
+        else:
+            message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                               text="process 11/11 [###########]" + '\n' + \
+                                                    "you're almost done ! ")
 
         chat_data['set_idea_send_message_id'] = message.message_id
 
-        chat_data['command'] = 'set_idea_set_overview'
+        chat_data['command'] = 'set_idea_insert_idea'
     else:
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 6/10 [######----]" + '\n' + \
+                                           text="process 7/11 [#######----]" + '\n' + \
                                                 "insert your stl link,please : ")
         #
         # context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
@@ -163,15 +175,17 @@ def set_idea_input_stl_link(update: Update, context: CallbackContext):
 
     if val:
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 7/10 [#######---]" + '\n' + \
+                                           text="process 8/11 [########---]" + '\n' + \
                                                 "if there exist stl_file ? :",
                                            reply_markup=ikm_yes_no)
+
+        chat_data['stl_link'] = stl_link
         chat_data['set_idea_send_message_id'] = message.message_id
         chat_data['command'] = 'set_idea_insert_stl_file'
 
     else:
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 7/10 [#######---]" + '\n' + \
+                                           text="process 7/11 [########---]" + '\n' + \
                                                 "Invalid link , please insert again :")
 
         chat_data['set_idea_send_message_id'] = message.message_id
@@ -179,29 +193,15 @@ def set_idea_input_stl_link(update: Update, context: CallbackContext):
                                ''
 
 
-# stl_link = update.message.text
-# context.chat_data['set_idea_input_stl_link'] = stl_link
-# chat_data = context.chat_data
-#
-# message = context.bot.send_message(chat_id=update.effective_chat.id,
-#                                    text="process 6/10 [######------]" + '\n' + \
-#                                         "overview :",
-#                                    reply_markup=ikm_yes_no)
-#
-# chat_data['set_idea_send_message_id'] = message.message_id
-# chat_data['command'] = 'set_idea_input_stl_file'
-
-
 def set_idea_insert_stl_file(update: Update, context: CallbackContext):
     chat_data = context.chat_data
     query = update.callback_query
-    print("ghazal khare")
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
     # context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 
     if query.data == 'yes':
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 8/10 [########--]" + '\n' + \
+                                           text="process 9/11 [#########--]" + '\n' + \
                                                 "upload your stl file,please ")
 
         chat_data['set_idea_send_message_id'] = message.message_id
@@ -209,7 +209,7 @@ def set_idea_insert_stl_file(update: Update, context: CallbackContext):
         chat_data['command'] = 'set_idea_upload_stl_file'
     else:
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 3/10 [###-------]" + '\n' + \
+                                           text="process 4/11 [####-------]" + '\n' + \
                                                 "your overview ? :"
                                            )
         chat_data['set_idea_send_message_id'] = message.message_id
@@ -227,26 +227,62 @@ def set_idea_upload_stl_file(update: Update, context: CallbackContext):
     download_document(update.message.document, 'app/idea/junk/stl_file/')
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
+    user = get_user(user=update.effective_user)
+    if user.is_idea_admin():
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="process 11/11 [###########]" + '\n' + \
+                                                "your overview :")
 
-    message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 10/10 [##########]" + '\n' + \
-                                            "your overview :")
+        chat_data['set_idea_send_message_id'] = message.message_id
+        chat_data['command'] = 'set_idea_overview'
 
-    chat_data['set_idea_send_message_id'] = message.message_id
+    else:
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text=('Process finished!'))
 
-    chat_data['command'] = 'set_idea_overview'
+        chat_data['set_idea_send_message_id'] = message.message_id
+        chat_data['command'] = 'set_idea_insert_idea'
 
 
-# def set_idea_overview (update: Update, context: CallbackContext) :
-#     overview = update.message.text
-#     if:
+def set_idea_overview(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+    chat_data['overview'] = update.message.text
+
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+
+    user = get_user(user=update.effective_user)
+    if user.is_idea_admin():
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="process 11/11 [###########]" + '\n' + \
+                                                "your overview :")
+
+        chat_data['set_idea_send_message_id'] = message.message_id
+
+        chat_data['command'] = 'set_idea_insert_idea'
+
+    else:
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text=('Process finished!'))
+
+        chat_data['set_idea_send_message_id'] = message.message_id
+        chat_data['command'] = 'set_idea_insert_idea'
+
+
 #
-#     else:
-#         message = context.bot.send_message(chat_id=update.effective_chat.id,
-#                                            text=('Process finished'))
+# def set_idea_input_description(update: Update, context: CallbackContext) -> None:
+#     chat_data = context.chat_data
+#     chat_data['set_idea_description'] = update.message.text
+#     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+#     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 #
-#         chat_data['set_idea_send_message_id'] = message.message_id
-
+#     message = context.bot.send_message(chat_id=update.effective_chat.id,
+#                                        text="process 2/10 [##----------]" + '\n' + \
+#                                             "same person as uploader?",
+#                                        reply_markup=ikm_yes_no)
+#
+#     chat_data['set_idea_send_message_id'] = message.message_id
+#
+#     chat_data['command'] = 'set_idea_same_innovator'
 
 def set_idea(update: Update, context: CallbackContext) -> None:
     chat_data = context.chat_data
@@ -260,7 +296,7 @@ def set_idea(update: Update, context: CallbackContext) -> None:
 
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
 
-    message = context.bot.send_message(chat_id=update.effective_chat.id, text="process 0/10 [------------]" + '\n' + \
+    message = context.bot.send_message(chat_id=update.effective_chat.id, text="process 1/10 [#----------]" + '\n' + \
                                                                               "Please upload your picture as photos: ")
     chat_data['set_idea_send_message_id'] = message.message_id
 
@@ -273,7 +309,7 @@ def set_idea_upload_picture(update: Update, context: CallbackContext):
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 
     message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 1/10 [#-----------]" + '\n' + \
+                                       text="process 2/11 [##---------]" + '\n' + \
                                             "Please send description for this idea :")
 
     chat_data['set_idea_send_message_id'] = message.message_id
