@@ -14,7 +14,7 @@ class Idea:
         self.overview = overview
         self.stl_file_link = stl_file_link
 
-    def insert_idea(self):
+    def insert_idea(self)->int:
         config = {
             'user': 'root',
             'password': '',
