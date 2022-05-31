@@ -1,78 +1,32 @@
-# from app.user.api import get_user
-
-# UserDB.is_idea_admin()
-# # asd = get_user(id=72025606)
-# from pathlib import Path
-# from telegram.update import Update
-# from telegram.ext.callbackcontext import CallbackContext
+# from anytree import Node, RenderTree
+# from anytree.exporter import DotExporter
 #
-# parent_path = Path(__file__).resolve().parent
-#
-#
-# def set_idea_input_stl_file(update: Update, context: CallbackContext):
-#     file = update.message.document
-#     newFile = file.getFile()
-#     newFile.download('stl')
-#     path = parent_path.joinpath('app/idea/junk/' + file.fil_name)
-#
-#     chat_data = context.chat_data
-#
-#     message = context.bot.send_message(chat_id=update.effective_chat.id,
-#                                        text="process 8/10 [########--]" + '\n' + \
-#                                             "overview :")
-#
-#     path = parent_path.joinpath(newFile)
-#
-#     chat_data['set_idea_send_message_id'] = message.message_id
-#     chat_data['command'] = 'unknown'
+# set_idea = Node("set_idea")
+# # upload_pic = Node("upload_pic", parent=set_idea)
+# # description = Node("description", parent=upload_pic)
+# # same_uploader = Node("same_uploader", parent=description)
+# # exist_stl = Node("exist_stl", parent=same_uploader)
+# # name_of_innovator = Node("name_of_innovator", parent=same_uploader)
+# # stl_link_es = Node("stl_link_es", parent=exist_stl)
+# # stl_link_ni = Node("stl_link_ni", parent=name_of_innovator)
+# # stl_file_es = Node("stl_file_es", parent=stl_link_es)
+# # stl_file_ni = Node("stl_file_ni", parent=stl_link_ni)
+# # overview_1 = Node("overview_1", parent=stl_link_ni)
+# # overview_2 = Node("overview_2", parent=stl_link_es)
+# # overview_3 = Node("overview_3", parent=stl_file_es)
+# # upload_file = Node("upload_file", parent=stl_file_es)
+# # overview_4 = Node("overview_4", parent=upload_file)
+# # print(RenderTree(upload_pic))
+# DotExporter(set_idea).to_picture("set_idea.png")
 
-def set_idea_input_stl_link(update: Update, context: CallbackContext):
-    stl_link = update.message.text
-    context.chat_data['set_idea_input_stl_link'] = stl_link
-    chat_data = context.chat_data
-    query = update.callback_query
-    query.answer()
+from anytree import Node, RenderTree
+from anytree.exporter import DotExporter
 
-    if query.data=='yes':
-
-        message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 6/10 [######------]" + '\n' + \
-                                            "if there exist stl_file ? :",
-                                       reply_markup=ikm_yes_no)
-        chat_data['set_idea_send_message_id'] = message.message_id
-        chat_data['command'] = 'set_idea_input_stl_file'
-    else :
-        message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 6/10 [######------]" + '\n' + \
-                                            "Overview :")
-
-
-
-        chat_data['set_idea_send_message_id'] = message.message_id
-        chat_data['command'] = 'set_idea_overview'
-
-
-def set_idea_insert_stl_file(update: Update, context: CallbackContext):
-    chat_data = context.chat_data
-
-    download_document(update.message.file[0], 'app/idea/junk/stl_file')
-    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
-    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
-
-    message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 1/10 [#-----------]" + '\n' + \
-                                            "Overview :")
-
-    chat_data['set_idea_send_message_id'] = message.message_id
-
-    chat_data['command'] = 'set_idea_overview'
-
-def set_idea_overview (update: Update, context: CallbackContext) :
-    overview = update.message.text
-    if:
-
-    else:
-        message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text=('Process finished'))
-
-        chat_data['set_idea_send_message_id'] = message.message_id
+udo = Node("Udo")
+marc = Node("Marc", parent=udo)
+lian = Node("Lian", parent=marc)
+dan = Node("Dan", parent=udo)
+jet = Node("Jet", parent=dan)
+jan = Node("Jan", parent=dan)
+joe = Node("Joe", parent=dan)
+DotExporter(udo).to_picture("set_idea.png")
