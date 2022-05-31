@@ -1,3 +1,4 @@
+import validators
 from pathlib import Path
 
 from telegram import KeyboardButton, ReplyKeyboardMarkup
@@ -5,8 +6,8 @@ from telegram.update import Update
 from telegram.ext.callbackcontext import CallbackContext
 
 from MainCode import parent_path
-from app.user.api import get_all_user, get_user, add_user
-from core.api import download_photo
+from app.user.api import get_all_user, get_user
+from core.api import download_photo, download_document, format_url
 from core.config.database import channel_id
 from app.idea.model import idea_model
 from core.style.InlineKeyboardMarkup import ikm_yes_no
@@ -50,7 +51,8 @@ def set_idea_input_innovator(update: Update, context: CallbackContext) -> None:
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 
     message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="if there exist stl file ?",
+                                       text="process 4/10 [#####-------]" + '\n' + \
+                                            "if there exist stl file ?",
                                        reply_markup=ikm_yes_no)
     chat_data['set_idea_send_message_id'] = message.message_id
 
@@ -65,7 +67,7 @@ def set_idea_same_innovator(update: Update, context: CallbackContext) -> None:
 
     if query.data == 'yes':
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 4/10 [####--------]" + '\n' + \
+                                           text="process 5/10 [#####-------]" + '\n' + \
                                                 "if there exist stl file ?",
                                            reply_markup=ikm_yes_no)
 
@@ -133,7 +135,7 @@ def idea_stl_file_question(update: Update, context: CallbackContext) -> None:
 
     if query.data == 'no':
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 7/10 [#######-----]" + '\n' + \
+                                           text="process 9/10 [#########-]" + '\n' + \
                                                 "your overview : ",
                                            reply_markup=ikm_yes_no)
 
@@ -142,8 +144,11 @@ def idea_stl_file_question(update: Update, context: CallbackContext) -> None:
         chat_data['command'] = 'set_idea_set_overview'
     else:
         message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="process 5/10 [#####-------]" + '\n' + \
+                                           text="process 6/10 [######----]" + '\n' + \
                                                 "insert your stl link,please : ")
+        #
+        # context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+        # context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
 
         chat_data['set_idea_send_message_id'] = message.message_id
         chat_data['command'] = 'set_idea_input_stl_link'
@@ -154,13 +159,93 @@ def set_idea_input_stl_link(update: Update, context: CallbackContext):
     context.chat_data['set_idea_input_stl_link'] = stl_link
     chat_data = context.chat_data
 
+    val: bool = validators.url(format_url(stl_link))
+
+    if val:
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="process 7/10 [#######---]" + '\n' + \
+                                                "if there exist stl_file ? :",
+                                           reply_markup=ikm_yes_no)
+        chat_data['set_idea_send_message_id'] = message.message_id
+        chat_data['command'] = 'set_idea_insert_stl_file'
+
+    else:
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="process 7/10 [#######---]" + '\n' + \
+                                                "Invalid link , please insert again :")
+
+        chat_data['set_idea_send_message_id'] = message.message_id
+        chat_data['command'] = 'set_idea_input_stl_link' \
+                               ''
+
+
+# stl_link = update.message.text
+# context.chat_data['set_idea_input_stl_link'] = stl_link
+# chat_data = context.chat_data
+#
+# message = context.bot.send_message(chat_id=update.effective_chat.id,
+#                                    text="process 6/10 [######------]" + '\n' + \
+#                                         "overview :",
+#                                    reply_markup=ikm_yes_no)
+#
+# chat_data['set_idea_send_message_id'] = message.message_id
+# chat_data['command'] = 'set_idea_input_stl_file'
+
+
+def set_idea_insert_stl_file(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+    query = update.callback_query
+    print("ghazal khare")
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+    # context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
+
+    if query.data == 'yes':
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="process 8/10 [########--]" + '\n' + \
+                                                "upload your stl file,please ")
+
+        chat_data['set_idea_send_message_id'] = message.message_id
+
+        chat_data['command'] = 'set_idea_upload_stl_file'
+    else:
+        message = context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="process 3/10 [###-------]" + '\n' + \
+                                                "your overview ? :"
+                                           )
+        chat_data['set_idea_send_message_id'] = message.message_id
+
+        chat_data['command'] = 'set_idea_overview'
+
+    query.answer()
+
+    # download_document(update.message.file[0], 'app/idea/junk/stl_file')
+
+
+def set_idea_upload_stl_file(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+
+    download_document(update.message.document, 'app/idea/junk/stl_file/')
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_idea_send_message_id'])
+
     message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 6/10 [######------]" + '\n' + \
-                                            "overview :",
-                                       reply_markup=ikm_yes_no)
+                                       text="process 10/10 [##########]" + '\n' + \
+                                            "your overview :")
 
     chat_data['set_idea_send_message_id'] = message.message_id
-    chat_data['command'] = 'set_idea_input_stl_file'
+
+    chat_data['command'] = 'set_idea_overview'
+
+
+# def set_idea_overview (update: Update, context: CallbackContext) :
+#     overview = update.message.text
+#     if:
+#
+#     else:
+#         message = context.bot.send_message(chat_id=update.effective_chat.id,
+#                                            text=('Process finished'))
+#
+#         chat_data['set_idea_send_message_id'] = message.message_id
 
 
 def set_idea(update: Update, context: CallbackContext) -> None:
