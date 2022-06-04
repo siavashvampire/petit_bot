@@ -15,7 +15,7 @@ from core.style.InlineKeyboardMarkup import ikm_yes_no
 PHOTO_PATH = 'app/idea/junk/temp.jpg'
 
 
-def restart_set_idea(chat_dict):
+def restart_set_idea(chat_dict: dict):
     chat_dict.pop('command', "")
     chat_dict.pop('user_name', "")
     chat_dict.pop('set_idea_send_message_id', "")
