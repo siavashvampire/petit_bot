@@ -9,7 +9,7 @@ from app.idea.main import idea_stl_file_question, set_idea_accepted_idea, set_id
     set_idea_insert_idea
 
 
-def button(update: Update, context: CallbackContext) -> None:
+def query_handler(update: Update, context: CallbackContext) -> None:
     if context.chat_data['command'] == 'density':
         density_set_density(update, context)
     elif context.chat_data['command'] == 'set_idea_stl_file_Q':
@@ -24,10 +24,7 @@ def button(update: Update, context: CallbackContext) -> None:
         set_idea_insert_stl_file(update, context)
 
 
-
-
-
-def input_text(update: Update, context: CallbackContext) -> None:
+def text_handler(update: Update, context: CallbackContext) -> None:
     chat_data = context.chat_data
     if 'command' not in chat_data.keys() or chat_data['command'] == '':
         update.message.reply_text("command not set")
@@ -44,8 +41,7 @@ def input_text(update: Update, context: CallbackContext) -> None:
         set_idea_overview(update, context)
 
 
-
-def readfile_png(update: Update, context: CallbackContext):
+def photo_handler(update: Update, context: CallbackContext):
     chat_data = context.chat_data
     if 'command' not in chat_data.keys() or chat_data['command'] == '':
         update.message.reply_text("command not set")
