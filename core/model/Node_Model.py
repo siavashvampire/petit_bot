@@ -33,7 +33,7 @@ class NodeCore(NodeMixin):
 
     def __repr__(self):
         args = ["%r" % self.separator.join([""] + [str(node.name) for node in self.path])]
-        return _repr(self, args=args, nameblacklist=["name"])
+        return _repr(self, args=args, nameblacklist=["name", "function"])
 
     def render(self):
         print(RenderTree(self))
