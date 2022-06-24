@@ -1,7 +1,20 @@
 from typing import Callable, Optional
 
 from anytree import RenderTree, NodeMixin
-from anytree.node.util import _repr
+
+
+def _repr(node, args=None, nameblacklist=None):
+    classname = node.__class__.__name__
+    args = args or []
+    nameblacklist = nameblacklist or []
+    for key, value in filter(lambda item: not item[0].startswith("_") and item[0] not in nameblacklist,
+                             sorted(node.__dict__.items(),
+                                    key=lambda item: item[0])):
+        if callable(value):
+            args.append("%s=%s" % (key, value.__name__))
+        else:
+            args.append("%s=%r" % (key, value))
+    return "%s(%s)" % (classname, ", ".join(args))
 
 
 class NodeCore(NodeMixin):
