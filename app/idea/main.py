@@ -11,6 +11,7 @@ from core.api import download_photo, download_document, format_url
 from core.config.database import channel_id
 from app.idea.model import idea_model
 from core.style.InlineKeyboardMarkup import ikm_yes_no
+from core.model.Node_Model import Node
 
 PHOTO_PATH = 'app/idea/junk/temp.jpg'
 
@@ -362,3 +363,21 @@ def set_idea_change_user_idea(update: Update, context: CallbackContext):
 
     restart_set_idea(chat_data)
     query.answer()
+
+
+set_idea_node = Node("set_idea", function=set_idea)
+upload_pic_node = Node("upload_pic", parent=set_idea_node)
+description_node = Node("description", parent=upload_pic_node)
+same_uploader_node = Node("same_uploader", parent=description_node)
+exist_stl_node = Node("exist_stl", parent=same_uploader_node)
+name_of_innovator_node = Node("name_of_innovator", parent=same_uploader_node)
+stl_link_es_node = Node("stl_link_es", parent=exist_stl_node)
+stl_link_ni_node = Node("stl_link_ni", parent=name_of_innovator_node)
+stl_file_es_node = Node("stl_file_es", parent=stl_link_es_node)
+stl_file_ni_node = Node("stl_file_ni", parent=stl_link_ni_node)
+overview_1_node = Node("overview_1", parent=stl_link_ni_node)
+overview_2_node = Node("overview_2", parent=stl_link_es_node)
+overview_3_node = Node("overview_3", parent=stl_file_es_node)
+upload_file_node = Node("upload_file", parent=stl_file_es_node)
+overview_4_node = Node("overview_4", parent=upload_file_node)
+# set_idea_node.render()
