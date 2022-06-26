@@ -6,12 +6,15 @@ from telegram.ext.callbackcontext import CallbackContext
 
 # from MainCode import parent_path
 from app.user.api import get_all_user, get_user
-from core.api import download_photo
+from core.api import download_photo, download_document
+
 # from core.config.database import channel_id
 # from core.style.InlineKeyboardMarkup import ikm_yes_no
+from core.model.Node_Model import Node
 
 PHOTO_PATH = 'app/accounting/junk/temp.jpg'
 
+set_accounting_main_node = Node("set_accounting_main")
 
 def set_accounting(update: Update, context: CallbackContext) -> None:
     chat_data = context.chat_data
@@ -21,7 +24,8 @@ def set_accounting(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(text="you are not allowed to insert accounting")
         return
 
-    chat_data['command'] = 'set_accounting_upload'
+    chat_data['command'] = 'set_accounting_upload_pic'
+    set_accounting_main_node.position = 'set_accounting_upload_pic'
     chat_data['user_name'] = '@' + user.username
 
     context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
@@ -50,18 +54,25 @@ def set_accounting_upload_picture(update: Update, context: CallbackContext) -> N
 def set_accounting_upload_pdf_file(update: Update, context: CallbackContext) -> None:
     chat_data = context.chat_data
 
-    download_photo(update.message.photo[-1], PHOTO_PATH)
-    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
-    context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_accounting_send_message_id'])
+    path = download_document(update.message.document, 'app/accounting/junk/')
 
-    message = context.bot.send_message(chat_id=update.effective_chat.id,
-                                       text="process 1/10 [#-----------]" + '\n' + \
-                                            "Please send description for this idea :")
+    # context.bot.delete_message(chat_id=update.effective_chat.id, message_id=update.effective_message.message_id)
+    # context.bot.delete_message(chat_id=update.effective_chat.id, message_id=chat_data['set_accounting_send_message_id'])
+    #
+    # message = context.bot.send_message(chat_id=update.effective_chat.id,
+    #                                    text="process 1/10 [#-----------]" + '\n' + \
+    #                                         "Please send description for this idea :")
+    #
+    # chat_data['set_accounting_send_message_id'] = message.message_id
+    #
+    # chat_data['command'] = 'set_accounting_input_title'
 
-    chat_data['set_accounting_send_message_id'] = message.message_id
 
-    chat_data['command'] = 'set_accounting_input_description'
+set_accounting_node = Node("set_accounting", function=set_accounting, parent=set_accounting_main_node)
+set_accounting_upload_pic_node = Node("set_accounting_upload_pic", function=set_accounting_upload_picture,
+                                      parent=set_accounting_node)
 
+# set_accounting_node.render()
 
 # def restart_set_accounting(chat_dict):
 #     chat_dict.pop('command', "")
