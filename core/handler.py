@@ -1,7 +1,7 @@
 from telegram.update import Update
 from telegram.ext.callbackcontext import CallbackContext
 
-from app.accounting.main import set_accounting_upload_picture, set_accounting_upload_pdf_file
+from app.accounting.main import set_accounting_upload_picture, set_accounting_upload_pdf_file, set_accounting_main_node
 from app.density.main import density_set_density
 from app.idea.main import idea_stl_file_question, set_idea_accepted_idea, set_idea_same_innovator, \
     set_idea_input_description, set_idea_input_innovator, set_idea_upload_picture, set_idea_change_user_idea_start, \
@@ -66,3 +66,13 @@ def pdf_handler(update: Update, context: CallbackContext):
     else:
         update.message.reply_text("command that set is wrong")
         return
+
+
+def all_handler(update: Update, context: CallbackContext):
+    chat_data = context.chat_data
+    if 'command' not in chat_data.keys() or chat_data['command'] == '':
+        update.message.reply_text("command not set")
+        return
+    elif 'set_accounting' in chat_data['command']:
+        set_accounting_main_node.position.function(update, context)
+
